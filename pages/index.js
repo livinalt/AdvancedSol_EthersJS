@@ -67,6 +67,8 @@ export default function Home() {
     // initalize smartcontract with the essentials detials.
     const smartContract = new ethers.Contract(contractAddress, abi, provider);
     const contractWithSigner = smartContract.connect(signer);
+
+    // interact with the methods in smart contract
     const response = await contractWithSigner.readNum();
 
     console.log(parseInt(response))
@@ -74,12 +76,14 @@ export default function Home() {
     return
   }
   
-  async function writeNum(){
+  async function writeNumber(){
     try {
       setStoreLoader(true)
       const signer = provider.getSigner();
       const smartContract = new ethers.Contract(contractAddress, abi, provider);
       const contractWithSigner = smartContract.connect(signer);
+
+      // interact with the methods in smart contract as it's a write operation, we need to invoke the transation usinf .wait()
       const writeNumTX = await contractWithSigner.writeNum(enteredNumber);
       const response = await writeNumTX.wait()
       console.log(await response)
@@ -111,7 +115,7 @@ export default function Home() {
           setEnteredNumber(e.target.value);
         }} className="placeholder:italic transition-all placeholder:text-gray-500 w-4/6 border border-gray-500 rounded-md p-2 shadow-sm focus:outline-none focus:border-sky-500 focus:ring-sky-500 focus:ring-1 sm:text-sm" placeholder="Enter a number to store" type="text" name="store"/>
       </div>
-      <button onClick={writeNum} className='px-4 py-1 bg-slate-300 hover:bg-slate-500 transition-all w-32'> { storeLoader ? (
+      <button onClick={writeNumber} className='px-4 py-1 bg-slate-300 hover:bg-slate-500 transition-all w-32'> { storeLoader ? (
                   <svg
                     className="animate-spin h-5 w-5 text-white"
                     xmlns="http://www.w3.org/2000/svg"
