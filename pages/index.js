@@ -109,6 +109,11 @@ export default function Home() {
         Storage Frontend Demo
       </h1>
 
+      <h3>This action retrieves the saved number from smart contract. (i.e Read Operation)</h3>
+      <button className='px-4 py-1 bg-slate-300 hover:bg-slate-500 transition-all w-32' onClick={readNumber}> RETRIEVE </button>
+      <h4>The stored number is <span className='font-bold'>{storedNumber ? storedNumber : 0}</span> </h4>
+      <hr></hr>
+
       <h3>This action saves entered number into the smart contract. (i.e Write Operation) </h3>
       <div>
         <input onChange={(e)=>{
@@ -138,11 +143,6 @@ export default function Home() {
                   </svg>
               ): "STORE"} </button>
 
-      <hr></hr>
-
-      <h3>This action retrieves the saved number from smart contract. (i.e Read Operation)</h3>
-      <button className='px-4 py-1 bg-slate-300 hover:bg-slate-500 transition-all w-32' onClick={readNumber}> RETRIEVE </button>
-      <h4>The stored number is <span className='font-bold'>{storedNumber ? storedNumber : 0}</span> </h4>
 
     </div>
   )
