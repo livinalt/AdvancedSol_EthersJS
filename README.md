@@ -19,6 +19,21 @@
     
     Make sure to have some GoerliETH to test the app.
 
+- Install required dependencies
+
+    To start from scratch
+
+    `npm install ethers axios web3modal @walletconnect/web3-provider`
+
+    Update the code in `index.js` as per the requirement.
+
+    
+    To simulate the exisiting one:
+
+    Clone the repo.
+
+    Run `npm i` and `npm run dev`
+
 
 - To connect your own contract
 
