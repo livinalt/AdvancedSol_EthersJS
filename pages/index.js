@@ -27,6 +27,7 @@ export default function Home() {
 
   // the variable is used to invoke loader
   const [storeLoader, setStoreLoader] = useState(false)
+  const [retrieveLoader, setRetrieveLoader] = useState(false)
 
   async function initWallet(){
     try {
@@ -49,9 +50,8 @@ export default function Home() {
         
         const instanceVar = await web3ModalVar.connect();
         const providerVar = new ethers.providers.Web3Provider(instanceVar);
-        
         setProvider(providerVar)
-
+        readNumber(providerVar)
         return
       }
 
@@ -61,19 +61,27 @@ export default function Home() {
     }
   }
 
-  async function readNumber(){
-    const signer = provider.getSigner();
-
-    // initalize smartcontract with the essentials detials.
-    const smartContract = new ethers.Contract(contractAddress, abi, provider);
-    const contractWithSigner = smartContract.connect(signer);
-
-    // interact with the methods in smart contract
-    const response = await contractWithSigner.readNum();
-
-    console.log(parseInt(response))
-    setStoredNumber(parseInt(response))
-    return
+  async function readNumber(provider){
+    try {
+      setRetrieveLoader(true)
+      const signer = provider.getSigner();
+  
+      // initalize smartcontract with the essentials detials.
+      const smartContract = new ethers.Contract(contractAddress, abi, provider);
+      const contractWithSigner = smartContract.connect(signer);
+  
+      // interact with the methods in smart contract
+      const response = await contractWithSigner.readNum();
+  
+      console.log(parseInt(response))
+      setStoredNumber(parseInt(response))
+      setRetrieveLoader(false)
+      return
+    } catch (error) {
+      alert(error)
+      setRetrieveLoader(false)
+      return
+    }
   }
   
   async function writeNumber(){
@@ -94,6 +102,7 @@ export default function Home() {
 
     } catch (error) {
       alert(error)
+      setStoreLoader(false)
       return
     }
   }
@@ -110,7 +119,28 @@ export default function Home() {
       </h1>
 
       <h3>This action retrieves the saved number from smart contract. (i.e Read Operation)</h3>
-      <button className='px-4 py-1 bg-slate-300 hover:bg-slate-500 transition-all w-32' onClick={readNumber}> RETRIEVE </button>
+      <button className='px-4 py-1 bg-slate-300 hover:bg-slate-500 flex justify-around transition-all w-32' onClick={()=>readNumber(provider)}> { retrieveLoader ? (
+                  <svg
+                    className="animate-spin m-1 h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75 text-gray-700"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+              ): "RETRIEVE"} </button>
       <h4>The stored number is <span className='font-bold'>{storedNumber ? storedNumber : 0}</span> </h4>
       <hr></hr>
 
@@ -120,9 +150,9 @@ export default function Home() {
           setEnteredNumber(e.target.value);
         }} className="placeholder:italic transition-all placeholder:text-gray-500 w-4/6 border border-gray-500 rounded-md p-2 shadow-sm focus:outline-none focus:border-sky-500 focus:ring-sky-500 focus:ring-1 sm:text-sm" placeholder="Enter a number to store" type="text" name="store"/>
       </div>
-      <button onClick={writeNumber} className='px-4 py-1 bg-slate-300 hover:bg-slate-500 transition-all w-32'> { storeLoader ? (
+      <button onClick={writeNumber} className='px-4 py-1 bg-slate-300 flex justify-around hover:bg-slate-500 transition-all w-32'> { storeLoader ? (
                   <svg
-                    className="animate-spin h-5 w-5 text-white"
+                    className="animate-spin m-1 h-5 w-5 text-white"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
