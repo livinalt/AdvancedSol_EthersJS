@@ -3,17 +3,11 @@ const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
   env: {
-    CONTRACT_ADDRESS:"0x3705218BC1Ee772B484a2a429EdeDFE29d9c7788",
-    ABI:[
+    CONTRACT_ADDRESS:"0x44cffe670f9e7f5a3a162bbda666201cc1adce9d",
+    ABI: [
       {
-        "inputs": [
-          {
-            "internalType": "uint256",
-            "name": "_num",
-            "type": "uint256"
-          }
-        ],
-        "name": "writeNum",
+        "inputs": [],
+        "name": "deleteNum",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -29,6 +23,19 @@ const nextConfig = {
           }
         ],
         "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "_num",
+            "type": "uint256"
+          }
+        ],
+        "name": "writeNum",
+        "outputs": [],
+        "stateMutability": "nonpayable",
         "type": "function"
       }
     ]

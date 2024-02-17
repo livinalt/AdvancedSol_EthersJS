@@ -1,30 +1,17 @@
-// import required modules
-// the essential modules to interact with frontend are below imported.
-// ethers is the core module that makes RPC calls using any wallet provider like Metamask which is esssential to interact with Smart Contract
 import { ethers } from "ethers";
-// A single Web3 / Ethereum provider solution for all Wallets
 import Web3Modal from "web3modal";
-// yet another module used to provide rpc details by default from the wallet connected
 import WalletConnectProvider from "@walletconnect/web3-provider";
-// react hooks for setting and changing states of variables
 import { useEffect, useState } from 'react';
+import contractABI from './abi.json';
 
 export default function Home() {
-  // env variables are initalised
-  // contractAddress is deployed smart contract addressed 
-  const contractAddress = process.env.CONTRACT_ADDRESS
-  // application binary interface is something that defines structure of smart contract deployed.
-  const abi = process.env.ABI
+  const contractAddress = "0x44cffe670f9e7f5a3a162bbda666201cc1adce9d"
+  const abi = contractABI;
 
   // hooks for required variables
   const [provider, setProvider] = useState();
-  
-  // response from read operation is stored in the below variable
   const [storedNumber, setStoredNumber] = useState();
-
-  // the value entered in the input field is stored in the below variable
   const [enteredNumber, setEnteredNumber] = useState(0);
-
   // the variable is used to invoke loader
   const [storeLoader, setStoreLoader] = useState(false)
   const [retrieveLoader, setRetrieveLoader] = useState(false)
@@ -106,6 +93,29 @@ export default function Home() {
       return
     }
   }
+  
+  async function deleteNumber(){
+    try {
+      setStoreLoader(true)
+      const signer = provider.getSigner();
+      const smartContract = new ethers.Contract(contractAddress, abi, provider);
+      const contractWithSigner = smartContract.connect(signer);
+
+      // interact with the methods in smart contract as it's a write operation, we need to invoke the transation usinf .wait()
+      const deleteNumTX = await contractWithSigner.deleteNum();
+      const response = await deleteNumTX.wait()
+      console.log(await response)
+      setStoreLoader(false)
+
+      alert(`Number deleted successfully`)   
+      return
+
+    } catch (error) {
+      alert(error)
+      setStoreLoader(false)
+      return
+    }
+  }
 
   useEffect(() => {
     initWallet();
@@ -173,6 +183,10 @@ export default function Home() {
                   </svg>
               ): "STORE"} </button>
 
+
+<h3>This action deletes entered number from the smart contract. (Initialise number to 0) </h3>
+      
+      <button onClick={deleteNumber} className='px-4 py-1 bg-slate-300 flex justify-around hover:bg-slate-500 transition-all w-32'> DELETE </button>
 
     </div>
   )
