@@ -1,40 +1,56 @@
-- Setup NextJS App
-    
-    Create a nextjs app with below command
-    
-    ```bash
-    npx create-next-app storage-frontend
-    ```
-    
-    Add tailwind (to make it simpler to add styling for frontend elements)
-    
-    [https://tailwindcss.com/docs/guides/nextjs](https://tailwindcss.com/docs/guides/nextjs) (Step 2 and 3 from the link)
+# Vesting Token dApp
 
+## Overview
 
-- Metamask and Network Setup
-    
-    Make sure you installed metamask or other wallet provider.
-    
-    Switch the network to GoerliTestNet
-    
-    Make sure to have some GoerliETH to test the app.
+TokenVesting dApp is a decentralized application (dApp) built on the Ethereum blockchain to facilitates token vesting for organizations and stakeholders. The dApp allows organizations to register, whitelist stakeholders, and set up vesting schedules for token distribution.
 
-- Install required dependencies
+## Features
 
-    To start from scratch
+- **Organization Registration**: Organizations can register on the platform by providing their name, symbol, and token address.
+- **Stakeholder Whitelisting**: Organizations can whitelist stakeholders, such as founders, community members, or investors, to participate in token vesting.
+- **Vesting Schedule Management**: Organizations can set up vesting schedules for stakeholders, specifying release times and token amounts.
+- **Token Claiming**: Stakeholders can claim their vested tokens according to the schedule set by the organization.
 
-    `npm install ethers axios web3modal @walletconnect/web3-provider`
+## Technologies Used
 
-    Update the code in `index.js` as per the requirement.
+- **Solidity**: Smart contract development language for Ethereum.
+- **Hardhat**: Ethereum development environment for compiling, testing, and deploying smart contracts.
+- **OpenZeppelin Contracts**: Library for secure smart contract development.
+- **Ethers.js**: JavaScript library for interacting with the Ethereum blockchain.
+- **React**: JavaScript library for building user interfaces.
+- **Next.js**: React framework for server-side rendering and static site generation.
+- **Web3Modal**: Library for connecting to Ethereum wallets.
+- **WalletConnect**: Protocol for connecting decentralized applications to mobile wallets.
 
-    
-    To simulate the exisiting one:
+## Getting Started
 
-    Clone the repo.
+1. Clone the repository: `git clone https://github.com/livinalt/AdvancedSol_EthersJS.git`
+2. Install dependencies: `cd Vesting Token && npm install`
+3. Run the application: `npm start`
+4. Access the dApp in your browser at `http://localhost:3000`
 
-    Run `npm i` and `npm run dev`
+## Usage
 
+1. Connect your Ethereum wallet using Web3Modal.
+2. Register your organization by providing the required details.
+3. Whitelist stakeholders by specifying their addresses and types.
+4. Set up vesting schedules by defining release times and token amounts.
+5. Stakeholders can claim their vested tokens according to the schedule.
 
-- To connect your own contract
+## Contributing
 
-    Update the `/next.config.js` env variables `CONTRACT_ADDRESS` and `ABI`
+If you'd like to contribute to the project, please follow these steps:
+
+1. Fork the repository.
+2. Create a new branch: `git checkout -b feature/new-feature`
+3. Make your changes and commit them: `git commit -am 'Add new feature'`
+4. Push to the branch: `git push origin feature/new-feature`
+5. Submit a pull request.
+
+## License
+
+This project is licensed under the MIT License
+
+## Contact
+
+For questions or support, please contact [livinalt@gmail.com].
