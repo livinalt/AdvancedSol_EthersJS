@@ -1,193 +1,239 @@
+
 import { ethers } from "ethers";
+import { useEffect, useState } from 'react';
 import Web3Modal from "web3modal";
 import WalletConnectProvider from "@walletconnect/web3-provider";
-import { useEffect, useState } from 'react';
 import contractABI from './abi.json';
 
 export default function Home() {
-  const contractAddress = "0x44cffe670f9e7f5a3a162bbda666201cc1adce9d"
+  const contractAddress = "0x51d8573a677e2B274D2c7Dbc8c2c03CFDA4e94e1"
   const abi = contractABI;
 
-  // hooks for required variables
   const [provider, setProvider] = useState();
-  const [storedNumber, setStoredNumber] = useState();
-  const [enteredNumber, setEnteredNumber] = useState(0);
-  // the variable is used to invoke loader
-  const [storeLoader, setStoreLoader] = useState(false)
-  const [retrieveLoader, setRetrieveLoader] = useState(false)
+  const [orgAddress, setOrgAddress] = useState();
+  const [orgName, setOrgName] = useState();
+  const [orgSymbol, setOrgSymbol] = useState();
+  const [tokenAddress, setTokenAddress] = useState();
 
-  async function initWallet(){
+  const [stakeholderAddress, setStakeholderAddress] = useState('');
+  const [stakeholderType, setStakeholderType] = useState('');
+
+  const [vestingStakeholderAddress, setVestingStakeholderAddress] = useState('');
+  const [releaseTimes, setReleaseTimes] = useState([]);
+  const [amount, setAmount] = useState([]);
+
+  const [loading, setLoading] = useState(false);
+
+  async function initWallet() {
     try {
-      // check if any wallet provider is installed. i.e metamask xdcpay etc
       if (typeof window.ethereum === 'undefined') {
         console.log("Please install wallet.")
         alert("Please install wallet.")
         return
       }
-      else{
-          // raise a request for the provider to connect the account to our website
-          const web3ModalVar = new Web3Modal({
-            cacheProvider: true,
-            providerOptions: {
-            walletconnect: {
-              package: WalletConnectProvider,
-            },
+      const web3Modal = new Web3Modal({
+        cacheProvider: true,
+        providerOptions: {
+          walletconnect: {
+            package: WalletConnectProvider,
           },
-        });
-        
-        const instanceVar = await web3ModalVar.connect();
-        const providerVar = new ethers.providers.Web3Provider(instanceVar);
-        setProvider(providerVar)
-        readNumber(providerVar)
-        return
-      }
-
+        },
+      });
+      const instance = await web3Modal.connect();
+      const provider = new ethers.providers.Web3Provider(instance);
+      setProvider(provider);
+      return provider;
     } catch (error) {
       console.log(error)
-      return
+      return;
     }
   }
 
-  async function readNumber(provider){
+  async function registerOrganization() {
     try {
-      setRetrieveLoader(true)
+      setLoading(true); 
       const signer = provider.getSigner();
-  
-      // initalize smartcontract with the essentials detials.
-      const smartContract = new ethers.Contract(contractAddress, abi, provider);
-      const contractWithSigner = smartContract.connect(signer);
-  
-      // interact with the methods in smart contract
-      const response = await contractWithSigner.readNum();
-  
-      console.log(parseInt(response))
-      setStoredNumber(parseInt(response))
-      setRetrieveLoader(false)
-      return
+      const contract = new ethers.Contract(contractAddress, abi, signer);
+      await contract.registerOrganization(orgAddress, orgName, orgSymbol, tokenAddress);
+      setLoading(false);
+      alert("Organization registered successfully.");
     } catch (error) {
-      alert(error)
-      setRetrieveLoader(false)
-      return
+      alert(error.message);
+      setLoading(false);
     }
   }
-  
-  async function writeNumber(){
+
+  async function whitelistStakeholder() {
     try {
-      setStoreLoader(true)
-      const signer = provider.getSigner();
-      const smartContract = new ethers.Contract(contractAddress, abi, provider);
-      const contractWithSigner = smartContract.connect(signer);
-
-      // interact with the methods in smart contract as it's a write operation, we need to invoke the transation usinf .wait()
-      const writeNumTX = await contractWithSigner.writeNum(enteredNumber);
-      const response = await writeNumTX.wait()
-      console.log(await response)
-      setStoreLoader(false)
-
-      alert(`Number stored successfully ${enteredNumber}`)   
-      return
-
+      setLoading(true);
+      const signer = provider.getSigner(); 
+      const contract = new ethers.Contract(contractAddress, abi, signer);
+      await contract.whitelistStakeholder(orgAddress, stakeholderAddress, stakeholderType);
+      setLoading(false);
+      alert("Stakeholder whitelisted successfully.");
     } catch (error) {
-      alert(error)
-      setStoreLoader(false)
-      return
+      alert(error.message);
+      setLoading(false);
     }
   }
-  
-  async function deleteNumber(){
+
+  async function tokenClaim() {
     try {
-      setStoreLoader(true)
+      setLoading(true); 
       const signer = provider.getSigner();
-      const smartContract = new ethers.Contract(contractAddress, abi, provider);
-      const contractWithSigner = smartContract.connect(signer);
+      const contract = new ethers.Contract(contractAddress, abi, signer);
+      /* const releaseTimes = [vestingTime]; // Assuming one release time for simplicity
+      const tokenAmounts = [vestingAmount]; // Assuming one amount for simplicity */
+      await contract.claimTokens(orgAddress);
 
-      // interact with the methods in smart contract as it's a write operation, we need to invoke the transation usinf .wait()
-      const deleteNumTX = await contractWithSigner.deleteNum();
-      const response = await deleteNumTX.wait()
-      console.log(await response)
-      setStoreLoader(false)
-
-      alert(`Number deleted successfully`)   
-      return
-
+      setLoading(false);
+      alert("Tokens claimed successfully.");
     } catch (error) {
-      alert(error)
-      setStoreLoader(false)
-      return
+      alert(error.message);
+      setLoading(false);
+    }
+  }
+  async function addSchedule() {
+    try {
+      setLoading(true); 
+      const signer = provider.getSigner();
+      const contract = new ethers.Contract(contractAddress, abi, signer);
+      await contract.addVestingSchedule(orgAddress, vestingStakeholderAddress, releaseTimes, amount);
+      setLoading(false);
+      alert("Vesting schedule added successfully.");
+    } catch (error) {
+      alert(error.message);
+      setLoading(false);
     }
   }
 
   useEffect(() => {
     initWallet();
-  }, [])
-  
+  }, []);
 
   return (
-    <div className='m-6 space-y-4'>
+    <div className='flex-col p-24 m-6 space-y-4 content-center justify-around'>
+
       <h1 className="text-gray-700 text-3xl font-bold">
-        Storage Frontend Demo
+        VESTING dApp
       </h1>
-
-      <h3>This action retrieves the saved number from smart contract. (i.e Read Operation)</h3>
-      <button className='px-4 py-1 bg-slate-300 hover:bg-slate-500 flex justify-around transition-all w-32' onClick={()=>readNumber(provider)}> { retrieveLoader ? (
-                  <svg
-                    className="animate-spin m-1 h-5 w-5 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75 text-gray-700"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-              ): "RETRIEVE"} </button>
-      <h4>The stored number is <span className='font-bold'>{storedNumber ? storedNumber : 0}</span> </h4>
-      <hr></hr>
-
-      <h3>This action saves entered number into the smart contract. (i.e Write Operation) </h3>
-      <div>
-        <input onChange={(e)=>{
-          setEnteredNumber(e.target.value);
-        }} className="placeholder:italic transition-all placeholder:text-gray-500 w-4/6 border border-gray-500 rounded-md p-2 shadow-sm focus:outline-none focus:border-sky-500 focus:ring-sky-500 focus:ring-1 sm:text-sm" placeholder="Enter a number to store" type="text" name="store"/>
-      </div>
-      <button onClick={writeNumber} className='px-4 py-1 bg-slate-300 flex justify-around hover:bg-slate-500 transition-all w-32'> { storeLoader ? (
-                  <svg
-                    className="animate-spin m-1 h-5 w-5 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75 text-gray-700"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-              ): "STORE"} </button>
-
-
-<h3>This action deletes entered number from the smart contract. (Initialise number to 0) </h3>
+      <h1 className="text-gray-700 text-3xl font-bold">
+        Organization Registration
+      </h1>
+      <input onChange={(e)=>{ setOrgAddress(e.target.value);}}
+        className="placeholder:italic transition-all placeholder:text-gray-500 w-4/6 border border-gray-500 rounded-md p-2 shadow-sm focus:outline-none focus:border-sky-500 focus:ring-sky-500 focus:ring-1 sm:text-sm" 
+        placeholder="Organization Address" 
+        type="text" 
+        name="orgName"
+      />
       
-      <button onClick={deleteNumber} className='px-4 py-1 bg-slate-300 flex justify-around hover:bg-slate-500 transition-all w-32'> DELETE </button>
+      <input 
+        onChange={(e) => {setOrgName(e.target.value);}}
+        className="placeholder:italic transition-all placeholder:text-gray-500 w-4/6 border border-gray-500 rounded-md p-2 shadow-sm focus:outline-none focus:border-sky-500 focus:ring-sky-500 focus:ring-1 sm:text-sm" 
+        placeholder="Organization Name" 
+        type="text" 
+        name="orgName"
+      />
 
+      <input 
+        onChange={(e) => {setOrgSymbol(e.target.value);}}
+        className="placeholder:italic transition-all placeholder:text-gray-500 w-4/6 border border-gray-500 rounded-md p-2 shadow-sm focus:outline-none focus:border-sky-500 focus:ring-sky-500 focus:ring-1 sm:text-sm" 
+        placeholder="Organization Symbol" 
+        type="text" 
+        name="orgSymbol"
+      />
+
+      <input 
+        onChange={(e) => {setTokenAddress(e.target.value);}}
+        className="placeholder:italic transition-all placeholder:text-gray-500 w-4/6 border border-gray-500 rounded-md p-2 shadow-sm focus:outline-none focus:border-sky-500 focus:ring-sky-500 focus:ring-1 sm:text-sm" 
+        placeholder="Organization Token Address" 
+        type="text" 
+        name="orgToken"
+      />
+
+      <button 
+        onClick={registerOrganization} 
+        className='px-4 py-1 bg-slate-300 flex justify-around hover:bg-slate-500 transition-all w-32'
+        disabled={loading}
+      > 
+        { loading ? "Loading..." : "Register Organization"} 
+      </button>
+
+      {/* Stakeholder Whitelisting */}
+      <h1 className="text-gray-700 text-3xl font-bold">
+        Whitelist Stakeholder
+      </h1>
+      <div>
+        <input onChange={(e) => {setOrgAddress(e.target.value);}} 
+        className="w-96 border border-gray-500 rounded-md p-2 shadow-sm focus:outline-none focus:border-sky-500 focus:ring-sky-500 focus:ring-1 sm:text-sm" 
+        placeholder="Organisation Address" type="text" 
+        /> <br/>
+
+        <input onChange={(e) => {setStakeholderAddress(e.target.value);}} 
+        className="w-96 border border-gray-500 rounded-md p-2 shadow-sm focus:outline-none focus:border-sky-500 focus:ring-sky-500 focus:ring-1 sm:text-sm" 
+        placeholder="Stakeholder Address" type="text"
+         /> <br/>
+
+        <input onChange={(e) => {setStakeholderType(e.target.value);}} 
+        className="w-96 border border-gray-500 rounded-md p-2 shadow-sm focus:outline-none focus:border-sky-500 focus:ring-sky-500 focus:ring-1 sm:text-sm" placeholder="founder, community, investor..." type="text" />
+        <button onClick={whitelistStakeholder} disabled={loading} className='border px-4 py-1 bg-slate-300 hover:bg-slate-500 flex justify-around transition-all w-32'>Whitelist Stakeholder</button>
+      </div>
+
+      {/* Vesting Schedule */}
+      <h1 className="text-gray-700 text-3xl font-bold">
+        Add Vesting Schedule
+      </h1>
+      <input onChange={(e) => setOrgAddress(e.target.value)}
+        className="placeholder:italic transition-all placeholder:text-gray-500 w-4/6 border border-gray-500 rounded-md p-2 shadow-sm focus:outline-none focus:border-sky-500 focus:ring-sky-500 focus:ring-1 sm:text-sm"
+        placeholder="Enter organisation address"
+        type="text"
+        name="orgAddress"
+      />
+      
+      <input onChange={(e) => setVestingStakeholderAddress(e.target.value)}
+        className="placeholder:italic transition-all placeholder:text-gray-500 w-4/6 border border-gray-500 rounded-md p-2 shadow-sm focus:outline-none focus:border-sky-500 focus:ring-sky-500 focus:ring-1 sm:text-sm"
+        placeholder="Enter staker address"
+        type="text"
+        name="stakerAddress"
+      />
+      <input onChange={(e) => setReleaseTimes(e.target.value)}
+        className="placeholder:italic transition-all placeholder:text-gray-500 w-4/6 border border-gray-500 rounded-md p-2 shadow-sm focus:outline-none focus:border-sky-500 focus:ring-sky-500 focus:ring-1 sm:text-sm"
+        placeholder="Enter vesting time"
+        type="number"
+        name="releaseTimes"
+      />
+
+      <input onChange={(e) => setAmount(e.target.value)}
+        className="placeholder:italic transition-all placeholder:text-gray-500 w-4/6 border border-gray-500 rounded-md p-2 shadow-sm focus:outline-none focus:border-sky-500 focus:ring-sky-500 focus:ring-1 sm:text-sm"
+        placeholder="Enter amount"
+        type="number"
+        name="tokenAmounts"
+      />
+      
+      <button
+        onClick={addSchedule}
+        className='px-4 py-1 bg-slate-300 hover:bg-slate-500 flex justify-around transition-all w-32'
+        disabled={loading}>
+        { loading ? "Loading..." : "Add Vesting Schedule"} 
+      </button>
+      
+       {/* Button to claim tokens */}
+
+       <div>
+       <input onChange={(e) => {setOrgAddress(e.target.value);}} 
+        className="w-96 border border-gray-500 rounded-md p-2 shadow-sm focus:outline-none focus:border-sky-500 focus:ring-sky-500 focus:ring-1 sm:text-sm" 
+        placeholder="Organisation Address" type="text" /> <br/>
+
+        <button
+               onClick={() => tokenClaim()}
+                className='px-4 py-1 bg-slate-300 hover:bg-slate-500 flex justify-around transition-all w-32'
+                disabled={loading} 
+                >
+                {loading ? "Loading..." : "Claim Tokens"}
+            </button>
+       </div>
+            
+       
     </div>
-  )
+  );
 }
